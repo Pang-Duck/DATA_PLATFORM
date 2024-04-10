@@ -1,0 +1,107 @@
+version: "3.8"
+services:
+  mongodb_2:
+    image: pangduck/mongo:6.0
+    command: mongod --config /etc/mongod.conf --auth --bind_ip_all --replSet MongoReplicaSet --keyFile /etc/mongo.key
+    restart: always
+    container_name: mongodb_2
+    networks:
+      - Mongo_Cluster
+    depends_on:
+      - mongodb_1
+    ports:
+      - 27018:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "pangduck"
+      MONGO_INITDB_ROOT_PASSWORD: "pangduck@!09"
+    volumes:
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_2:/var/lib/mongodb
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_key/mongo.key:/etc/mongo.key
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_conf/mongod.conf:/etc/mongod.conf
+      - /data/PDATA_PLATFORM_platform/mongo_replica/log/mongodb_2/log:/var/log/mongodb
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_dump:/data/mongo_dump
+  mongodb_3:
+    image: pangduck/mongo:6.0
+    command: mongod --config /etc/mongod.conf --auth --bind_ip_all --replSet MongoReplicaSet --keyFile /etc/mongo.key
+    restart: always
+    container_name: mongodb_3
+    networks:
+      - Mongo_Cluster
+    depends_on:
+      - mongodb_2
+    ports:
+      - 27019:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "pangduck"
+      MONGO_INITDB_ROOT_PASSWORD: "pangduck@!09"
+    volumes:
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_3:/var/lib/mongodb
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_key/mongo.key:/etc/mongo.key
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_conf/mongod.conf:/etc/mongod.conf
+      - /data/PDATA_PLATFORM_platform/mongo_replica/log/mongodb_3/log:/var/log/mongodb
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_dump:/data/mongo_dump
+  mongodb_1:
+    image: pangduck/mongo:6.0
+    command: mongod --config /etc/mongod.conf --auth --bind_ip_all --replSet MongoReplicaSet --keyFile /etc/mongo.key && mongorestore -u pangduck -p pangduck@!09 /data/mongo_dump/mongo_dafault_dump_240130
+    restart: always
+    container_name: mongodb_1
+    networks:
+      - Mongo_Cluster
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: pangduck
+      MONGO_INITDB_ROOT_PASSWORD: pangduck@!09
+    volumes:
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_1:/var/lib/mongodb
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_key/mongo.key:/etc/mongo.key
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_conf/mongod.conf:/etc/mongod.conf
+      - /data/PDATA_PLATFORM_platform/mongo_replica/log/mongodb_1/log:/var/log/mongodb
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_dump:/data/mongo_dump
+  mongo_setup:
+    image: pangduck/mongo:6.0
+    container_name: mongo_setup
+    depends_on:
+      - mongodb_1
+      - mongodb_2
+      - mongodb_3
+    restart: on-failure
+    networks:
+      - Mongo_Cluster
+    volumes:
+      - /data/PDATA_PLATFORM_platform/mongo_replica/script:/script
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_key:/etc/mongo.key
+    entrypoint:
+      [
+        "/bin/bash",
+        "/script/setup_init.sh",
+        "&&",
+        "/usr/bin/chmod",
+        "400",
+        "/etc/mongo.key",
+        "&&",
+        "/usr/bin/chown",
+        "999.999",
+        "/etc/mongo.key",
+        "&&",
+        "exit",
+      ]
+  mongo_backup:
+    image: pangduck/mongo:6.0
+    container_name: mongo_backup
+    depends_on:
+      - mongodb_1
+      - mongodb_2
+      - mongodb_3
+      - mongo_setup
+    restart: always
+    entrypoint: /bin/bash /script/backup.sh
+    networks:
+      - Mongo_Cluster
+    volumes:
+      - /data/PDATA_PLATFORM_platform/mongo_replica/script:/script
+      - /data/PDATA_PLATFORM_platform/mongo_replica/mongo_dump:/data/mongo_dump
+
+networks:
+  Mongo_Cluster:
+    name: Mongo_Cluster

@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  DATA_PLATFORM_WEB:
+    image: pangduck/nginx:1.0
+    command: bash -c "/start.sh"
+    ports:
+      - "3004:80"
+      - "3000:3000"
+      - "3001:3001"
+    networks:
+      - PDATA_PLATFORM
+    volumes:
+      - /data/PDATA_PLATFORM_platform/DATA_PLATFORM_WEB/client:/data/www
+      - /data/PDATA_PLATFORM_platform/DATA_PLATFORM_WEB/server:/data/backend
+      - /data/PDATA_PLATFORM_platform/DATA_PLATFORM_WEB/nginx:/etc/nginx
+    deploy:
+      restart_policy:
+        condition: any
+networks:
+  PDATA_PLATFORM:

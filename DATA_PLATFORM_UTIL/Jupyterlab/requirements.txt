@@ -1,0 +1,22 @@
+tqdm
+pyinstaller
+numpy
+pandas
+scikit-learn
+matplotlib
+clickhouse-connect
+torch== 2.0.1
+transformers
+datasets
+apache-airflow
+captum == 0.6.0
+tqdm
+psutil
+pyspectator
+GPUtil
+fastapi
+uvicorn[standard]
+swifter
+tensorflow==2.13.0
+jupyterlab
+

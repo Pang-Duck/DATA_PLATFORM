@@ -1,0 +1,57 @@
+version: "3.5"
+services:
+  portainer:
+    image: portainer/portainer:latest
+    ports:
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /data/DATA_PLATFORM_UTIL/Portainer_data:/data
+    networks:
+      - PDATA_PLATFORM
+    deploy:
+      restart_policy:
+        condition: any
+  jupyterlab:
+    image: pangduck/jupyterlab:1.0
+    command: "jupyter lab --ip 0.0.0.0 --port 8780 --notebook-dir=/workspace --allow-root &"
+    ports:
+      - 8780:8780
+    volumes:
+      - /data/DATA_PLATFORM_AIRFLOW:/workspace
+    networks:
+      - PDATA_PLATFORM
+    deploy:
+      restart_policy:
+        condition: any
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+  health_check:
+    image: pangduck/health_check:1.0
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    ports:
+      - 7972:7972
+    volumes:
+      - /data/DATA_PLATFORM_UTIL/Health_Check:/home/pangduck
+    networks:
+      - PDATA_PLATFORM
+    deploy:
+      restart_policy:
+        condition: any
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+  health_check_alert:
+    image: pangduck/health_check_alert:1.0
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    volumes:
+      - /data/DATA_PLATFORM_UTIL/Health_Check_Alert:/home/pangduck
+    networks:
+      - PDATA_PLATFORM
+    deploy:
+      restart_policy:
+        condition: any
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+
+networks:
+  PDATA_PLATFORM:
