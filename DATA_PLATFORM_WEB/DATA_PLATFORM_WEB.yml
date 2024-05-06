@@ -10,9 +10,9 @@ services:
     networks:
       - PDATA_PLATFORM
     volumes:
-      - /data/PDATA_PLATFORM_platform/DATA_PLATFORM_WEB/client:/data/www
-      - /data/PDATA_PLATFORM_platform/DATA_PLATFORM_WEB/server:/data/backend
-      - /data/PDATA_PLATFORM_platform/DATA_PLATFORM_WEB/nginx:/etc/nginx
+      - /data/DATA_PLATFORM_platform/DATA_PLATFORM_WEB/client:/data/www
+      - /data/DATA_PLATFORM_platform/DATA_PLATFORM_WEB/server:/data/backend
+      - /data/DATA_PLATFORM_platform/DATA_PLATFORM_WEB/nginx:/etc/nginx
     deploy:
       restart_policy:
         condition: any
